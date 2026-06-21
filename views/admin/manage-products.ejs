@@ -1,0 +1,31 @@
+```html
+<%- include('../partials/header') %>
+
+<h2>Manage Products</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Vendor</th>
+            <th>Price</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% products.forEach(product => { %>
+            <tr>
+                <td><%= product.name %></td>
+                <td><%= product.vendor.username %></td>
+                <td>$<%= product.price.toFixed(2) %></td>
+                <td>
+                    <form action="/admin/products/delete/<%= product._id %>" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        <% }) %>
+    </tbody>
+</table>
+
+<%- include('../partials/footer') %>
+

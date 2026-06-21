@@ -1,0 +1,90 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+<h1>Products</h1>
+
+<!-- AI: Trending Products Section -->
+<% if (typeof trending !== 'undefined' && trending.length > 0) { %>
+<div class="mb-4 p-3 bg-light rounded shadow-sm">
+    <h4>🔥 Trending Products <small class="text-muted">— AI Recommended</small></h4>
+    <div class="row">
+        <% trending.forEach(p => { %>
+        <div class="col-md-2 mb-3">
+            <div class="card h-100 shadow-sm" style="cursor:pointer;" onclick="window.location='/product/<%= p._id %>'">
+                <% const tImg = p.image || p.imageUrl || '/images/placeholder.png'; %>
+                <img src="<%= tImg %>" class="card-img-top" style="height:100px;object-fit:cover;" alt="<%= p.name %>">
+                <div class="card-body p-2 text-center">
+                    <small class="card-title fw-bold"><%= p.name.substring(0, 15) %><%= p.name.length > 15 ? '...' : '' %></small>
+                    <div class="text-success fw-bold">₹<%= p.price.toFixed(0) %></div>
+                </div>
+            </div>
+        </div>
+        <% }) %>
+    </div>
+</div>
+<% } %>
+
+<form action="/search" method="GET" class="mb-4 p-3 bg-light rounded shadow-sm">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <input type="text" name="search" placeholder="🔍 Search products..." value="<%= typeof search !== 'undefined' ? search : '' %>" class="form-control">
+        </div>
+        <div class="col-md-2">
+            <select name="category" class="form-select">
+                <option value="">All Categories</option>
+                <option value="Electronics" <%= typeof category !== 'undefined' && category === 'Electronics' ? 'selected' : '' %>>Electronics</option>
+                <option value="Fashion" <%= typeof category !== 'undefined' && category === 'Fashion' ? 'selected' : '' %>>Fashion</option>
+                <option value="Books" <%= typeof category !== 'undefined' && category === 'Books' ? 'selected' : '' %>>Books</option>
+                <option value="Home" <%= typeof category !== 'undefined' && category === 'Home' ? 'selected' : '' %>>Home</option>
+                <option value="Sports" <%= typeof category !== 'undefined' && category === 'Sports' ? 'selected' : '' %>>Sports</option>
+                <option value="Accessories" <%= typeof category !== 'undefined' && category === 'Accessories' ? 'selected' : '' %>>Accessories</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="number" name="minPrice" placeholder="Min ₹" min="0" step="0.01" value="<%= typeof minPrice !== 'undefined' ? minPrice : '' %>" class="form-control">
+        </div>
+        <div class="col-md-2">
+            <input type="number" name="maxPrice" placeholder="Max ₹" min="0" step="0.01" value="<%= typeof maxPrice !== 'undefined' ? maxPrice : '' %>" class="form-control">
+        </div>
+        <div class="col-md-2 d-flex gap-1">
+            <button type="submit" class="btn btn-primary flex-grow-1">Filter</button>
+            <a href="/" class="btn btn-outline-secondary">Reset</a>
+        </div>
+    </div>
+</form>
+
+<p class="text-muted">Total Products: <strong><%= products.length %></strong></p>
+
+<div class="row">
+    <% if (products.length === 0) { %>
+        <div class="col-12 text-center py-5">
+            <h4 class="text-muted">No products found</h4>
+            <p>Try adjusting your search or filters.</p>
+        </div>
+    <% } %>
+    <% products.forEach(product => { %>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <% const img = product.image || product.imageUrl || '/images/placeholder.png'; %>
+                <img src="<%= img %>" class="card-img-top" alt="<%= product.name %>" style="height: 200px; object-fit: cover;">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title"><%= product.name %></h5>
+                    <span class="badge bg-secondary mb-2" style="width: fit-content;"><%= product.category %></span>
+                    <p class="card-text text-muted small"><%= product.description.substring(0, 80) %><%= product.description.length > 80 ? '...' : '' %></p>
+                    <div class="mt-auto">
+                        <h5 class="text-success">₹<%= product.price.toFixed(2) %></h5>
+                        <% if (product.stock > 0) { %>
+                            <span class="badge bg-success">In Stock (<%= product.stock %>)</span>
+                        <% } else { %>
+                            <span class="badge bg-danger">Out of Stock</span>
+                        <% } %>
+                        <a href="/product/<%= product._id %>" class="btn btn-primary btn-sm mt-2 w-100">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% }) %>
+</div>
+</div>
+
+<%- include('../partials/footer') %>

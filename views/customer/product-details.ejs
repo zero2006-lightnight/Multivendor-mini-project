@@ -1,0 +1,145 @@
+<%- include('../partials/header') %>
+
+<% if(success_msg.length > 0) { %>
+    <div class="alert alert-success"><%= success_msg %></div>
+<% } %>
+<% if(error_msg.length > 0) { %>
+    <div class="alert alert-danger"><%= error_msg %></div>
+<% } %>
+
+<div class="row">
+    <div class="col-md-6">
+        <% const img = product.image || product.imageUrl || '/images/placeholder.png'; %>
+        <img src="<%= img %>" class="img-fluid rounded shadow" alt="<%= product.name %>">
+    </div>
+    <div class="col-md-6">
+        <h2><%= product.name %></h2>
+        <p>
+            <strong>Rating:</strong>
+            <% for (let i = 1; i <= 5; i++) { %><%= i <= Math.round(averageRating) ? '⭐' : '☆' %><% } %>
+            <%= averageRating %>/5 (<%= reviewCount %> Reviews)
+        </p>
+        <p><strong>Sold by:</strong> <%= product.vendor.shopName %></p>
+        <h4 class="text-success">₹<%= product.price.toFixed(2) %></h4>
+        <p><strong>In Stock:</strong> <%= product.stock %></p>
+        <form action="/cart/add" method="POST">
+            <input type="hidden" name="productId" value="<%= product._id %>">
+            <div class="mb-3">
+                <label for="quantity">Quantity:</label>
+                <input type="number" name="quantity" id="quantity" value="1" min="1" max="<%= product.stock %>" class="form-control" style="width: 100px;">
+            </div>
+            <button type="submit" class="btn btn-success">🛒 Add to Cart</button>
+        </form>
+        <% if (user) { %>
+        <form action="/wishlist/<%= product._id %>" method="POST" class="mt-2">
+            <button type="submit" class="btn btn-outline-danger">❤️ Add to Wishlist</button>
+        </form>
+        <% } %>
+    </div>
+</div>
+
+<hr>
+
+<!-- AI: Similar Products -->
+<% if (typeof similarProducts !== 'undefined' && similarProducts.length > 0) { %>
+<div class="mb-4">
+    <h4>🤖 Similar Products <small class="text-muted">— AI Recommended</small></h4>
+    <div class="row">
+        <% similarProducts.forEach(p => { %>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 shadow-sm">
+                <% const simImg = p.image || p.imageUrl || '/images/placeholder.png'; %>
+                <img src="<%= simImg %>" class="card-img-top" style="height:140px;object-fit:cover;" alt="<%= p.name %>">
+                <div class="card-body p-2">
+                    <h6 class="card-title mb-1"><%= p.name %></h6>
+                    <span class="text-success fw-bold">₹<%= p.price.toFixed(2) %></span>
+                    <a href="/product/<%= p._id %>" class="btn btn-sm btn-outline-primary w-100 mt-2">View</a>
+                </div>
+            </div>
+        </div>
+        <% }) %>
+    </div>
+</div>
+<% } %>
+
+<!-- AI: Customers Also Bought -->
+<% if (typeof alsoBoughtProducts !== 'undefined' && alsoBoughtProducts.length > 0) { %>
+<div class="mb-4">
+    <h4>🛒 Customers Also Bought <small class="text-muted">— AI Recommended</small></h4>
+    <div class="row">
+        <% alsoBoughtProducts.forEach(p => { %>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 shadow-sm">
+                <% const abImg = p.image || p.imageUrl || '/images/placeholder.png'; %>
+                <img src="<%= abImg %>" class="card-img-top" style="height:140px;object-fit:cover;" alt="<%= p.name %>">
+                <div class="card-body p-2">
+                    <h6 class="card-title mb-1"><%= p.name %></h6>
+                    <span class="text-success fw-bold">₹<%= p.price.toFixed(2) %></span>
+                    <a href="/product/<%= p._id %>" class="btn btn-sm btn-outline-primary w-100 mt-2">View</a>
+                </div>
+            </div>
+        </div>
+        <% }) %>
+    </div>
+</div>
+<% } %>
+
+<hr>
+
+<h3>Reviews</h3>
+<form action="/product/<%= product._id %>" method="GET" class="mb-3">
+    <select name="sort" class="form-control" onchange="this.form.submit()">
+        <option value="latest" <%= currentSort === 'latest' ? 'selected' : '' %>>Latest First</option>
+        <option value="oldest" <%= currentSort === 'oldest' ? 'selected' : '' %>>Oldest First</option>
+        <option value="highest" <%= currentSort === 'highest' ? 'selected' : '' %>>Highest Rating</option>
+        <option value="lowest" <%= currentSort === 'lowest' ? 'selected' : '' %>>Lowest Rating</option>
+    </select>
+</form>
+
+<% if (reviews.length > 0) { %>
+    <% reviews.forEach(review => { %>
+        <div class="card mb-2">
+            <div class="card-body">
+                <h5><%= review.user.username %> <span class="badge bg-success">Verified Purchase</span></h5>
+                <p>Rating: <%= review.rating %>/5</p>
+                <p><%= review.comment %></p>
+                <%
+                const liked = user ? (review.helpfulUsers || []).some(id => id.toString() === user._id.toString()) : false;
+                %>
+                <form action="/review/helpful/<%= review._id %>" method="POST" style="display:inline;">
+                    <button type="submit" class="btn <%= liked ? 'btn-primary' : 'btn-outline-primary' %> btn-sm">👍 Helpful (<%= review.helpfulUsers.length %>)</button>
+                </form>
+                <a href="/review/edit/<%= review._id %>" class="btn btn-warning btn-sm">Edit</a>
+                <form action="/review/delete/<%= review._id %>" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this review?')">Delete</button>
+                </form>
+            </div>
+        </div>
+    <% }) %>
+<% } else { %>
+    <p>No reviews yet.</p>
+<% } %>
+
+<hr>
+<% if (user) { %>
+<h3>Write a Review</h3>
+<form action="/review/<%= product._id %>" method="POST">
+    <div class="mb-2">
+        <label>Rating</label>
+        <select name="rating" class="form-control">
+            <option value="5">5 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="2">2 Stars</option>
+            <option value="1">1 Star</option>
+        </select>
+    </div>
+    <div class="mb-2">
+        <label>Comment</label>
+        <textarea name="comment" class="form-control" rows="3" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit Review</button>
+</form>
+<% } %>
+
+<%- include('../partials/footer') %>

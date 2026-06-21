@@ -1,0 +1,65 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+
+    <h2>Edit Review</h2>
+
+    <form action="/review/edit/<%= review._id %>" method="POST">
+
+        <div class="mb-3">
+
+            <label>Rating</label>
+
+            <select
+                name="rating"
+                class="form-control"
+            >
+
+                <option value="1"
+                    <%= review.rating == 1 ? 'selected' : '' %>>
+                    1 Star
+                </option>
+
+                <option value="2"
+                    <%= review.rating == 2 ? 'selected' : '' %>>
+                    2 Stars
+                </option>
+
+                <option value="3"
+                    <%= review.rating == 3 ? 'selected' : '' %>>
+                    3 Stars
+                </option>
+
+                <option value="4"
+                    <%= review.rating == 4 ? 'selected' : '' %>>
+                    4 Stars
+                </option>
+
+                <option value="5"
+                    <%= review.rating == 5 ? 'selected' : '' %>>
+                    5 Stars
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label>Comment</label>
+
+            <textarea
+                name="comment"
+                class="form-control"
+                rows="5"
+            ><%= review.comment %></textarea>
+
+        </div>
+
+        <button class="btn btn-primary">
+            Update Review
+        </button>
+
+    </form>
+
+</div>

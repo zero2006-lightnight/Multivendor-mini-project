@@ -1,0 +1,154 @@
+<%- include('../partials/header') %>
+
+<style>
+.chatbot-container { max-width: 800px; margin: 0 auto; }
+.chat-messages { height: 500px; overflow-y: auto; padding: 15px; background: #f8f9fa; border-radius: 12px; margin-bottom: 15px; }
+.chat-message { margin-bottom: 15px; display: flex; gap: 10px; }
+.chat-message.user { flex-direction: row-reverse; }
+.chat-bubble { max-width: 75%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.5; white-space: pre-line; }
+.chat-message.bot .chat-bubble { background: #fff; border: 1px solid #e0e0e0; border-bottom-left-radius: 4px; }
+.chat-message.user .chat-bubble { background: #007bff; color: #fff; border-bottom-right-radius: 4px; }
+.chat-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.chat-message.bot .chat-avatar { background: #e3f2fd; }
+.chat-message.user .chat-avatar { background: #007bff22; }
+.chat-input-area { display: flex; gap: 10px; }
+.chat-input-area input { flex: 1; border-radius: 25px; padding: 12px 20px; border: 2px solid #e0e0e0; font-size: 14px; }
+.chat-input-area input:focus { outline: none; border-color: #007bff; }
+.chat-input-area button { border-radius: 25px; padding: 12px 24px; }
+.typing-indicator { display: flex; gap: 4px; padding: 8px 16px; }
+.typing-dot { width: 8px; height: 8px; background: #999; border-radius: 50%; animation: typing 1.4s infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-8px); } }
+.chat-product-card { display: inline-block; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 8px 12px; margin: 5px 5px 5px 0; font-size: 12px; max-width: 200px; }
+.chat-product-card .product-name { font-weight: 600; color: #333; }
+.chat-product-card .product-price { color: #28a745; font-weight: bold; }
+.chat-product-card a { text-decoration: none; color: inherit; }
+.quick-replies { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.quick-reply { background: #e3f2fd; border: 1px solid #90caf9; border-radius: 20px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+.quick-reply:hover { background: #bbdefb; }
+.ai-badge { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+</style>
+
+<div class="container chatbot-container mt-4">
+    <h2>🤖 AI Shopping Assistant <span class="ai-badge"><%= aiEnabled ? (aiProvider === 'openrouter' ? 'OpenRouter AI' : aiProvider === 'openai' ? 'GPT Powered' : 'AI Powered') : 'Smart Rules' %></span></h2>
+    <p class="text-muted mb-3">Ask me about products, orders, recommendations, or anything else!</p>
+
+    <div class="chat-messages" id="chatMessages">
+        <div class="chat-message bot">
+            <div class="chat-avatar">🤖</div>
+            <div>
+                <div class="chat-bubble">
+                    Hello! 👋 I'm your AI shopping assistant. I can help you:
+                    • 🔍 Find products
+                    • 💰 Check prices
+                    • 📦 Check stock availability
+                    • 📋 Track your orders
+                    • 🌟 Get recommendations
+                </div>
+                <div class="quick-replies">
+                    <span class="quick-reply" onclick="sendQuick('Show me trending products')">🌟 Trending</span>
+                    <span class="quick-reply" onclick="sendQuick('What categories do you have?')">📂 Categories</span>
+                    <span class="quick-reply" onclick="sendQuick('What is your return policy?')">📋 Returns</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter')sendMessage()">
+        <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+
+function scrollToBottom() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function addMessage(text, products, isUser) {
+    const div = document.createElement('div');
+    div.className = `chat-message ${isUser ? 'user' : 'bot'}`;
+    const avatar = isUser ? '👤' : '🤖';
+    let html = `<div class="chat-avatar">${avatar}</div><div><div class="chat-bubble">${escapeHtml(text)}</div>`;
+
+    if (products && products.length > 0) {
+        html += '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">';
+        products.forEach(p => {
+            const img = p.image || p.imageUrl || '';
+            html += `<a href="/product/${p._id}" class="chat-product-card">
+                ${img ? `<img src="${img}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:4px;" alt="${p.name}">` : ''}
+                <div class="product-name">${escapeHtml(p.name)}</div>
+                <div class="product-price">₹${p.price.toFixed(2)}</div>
+                <div style="color:#666;font-size:11px;">${escapeHtml(p.category)}</div>
+            </a>`;
+        });
+        html += '</div>';
+    }
+
+    if (!isUser) {
+        html += `<div class="quick-replies">
+            <span class="quick-reply" onclick="sendQuick('Show me trending products')">🌟 Trending</span>
+            <span class="quick-reply" onclick="sendQuick('What do you sell?')">📂 Browse</span>
+        </div>`;
+    }
+    html += '</div>';
+    div.innerHTML = html;
+    chatMessages.appendChild(div);
+    scrollToBottom();
+}
+
+function addTypingIndicator() {
+    const div = document.createElement('div');
+    div.className = 'chat-message bot';
+    div.id = 'typingIndicator';
+    div.innerHTML = `<div class="chat-avatar">🤖</div><div class="chat-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+    chatMessages.appendChild(div);
+    scrollToBottom();
+}
+
+function removeTypingIndicator() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML.replace(/\n/g, '<br>');
+}
+
+async function sendMessage() {
+    const message = chatInput.value.trim();
+    if (!message) return;
+    chatInput.value = '';
+    addMessage(message, [], true);
+    addTypingIndicator();
+
+    try {
+        const res = await fetch('/ai/chatbot', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
+        });
+        const data = await res.json();
+        removeTypingIndicator();
+        addMessage(data.text, data.products, false);
+    } catch (err) {
+        removeTypingIndicator();
+        addMessage('Sorry, I encountered an error. Please try again.', [], false);
+    }
+}
+
+function sendQuick(message) {
+    chatInput.value = message;
+    sendMessage();
+}
+
+scrollToBottom();
+</script>
+
+<%- include('../partials/footer') %>

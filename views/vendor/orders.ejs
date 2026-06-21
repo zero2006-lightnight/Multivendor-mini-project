@@ -1,0 +1,75 @@
+<%- include('../partials/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>My Orders (Vendor)</h2>
+    <a href="/vendor/dashboard" class="btn btn-outline-secondary">← Back to Dashboard</a>
+</div>
+
+<% if (orders.length > 0) { %>
+    <% orders.forEach(order => { %>
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <strong>Order #<%= order._id %></strong>
+                    &mdash; <%= new Date(order.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) %>
+                </span>
+                <div>
+                    <span class="badge 
+                        <% if (order.status === 'Delivered') { %>bg-success
+                        <% } else if (order.status === 'Cancelled') { %>bg-danger
+                        <% } else if (order.status === 'Shipped') { %>bg-info
+                        <% } else { %>bg-warning text-dark<% } %>">
+                        <%= order.status %>
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Customer</h6>
+                        <p class="mb-1"><strong><%= order.customer ? order.customer.username : 'N/A' %></strong></p>
+                        <p class="text-muted"><%= order.customer ? order.customer.email : '' %></p>
+
+                        <h6 class="text-muted mt-3">Shipping Address</h6>
+                        <% if (order.shippingAddress) { %>
+                            <p class="mb-0"><%= order.shippingAddress.street %></p>
+                            <p class="mb-0"><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> - <%= order.shippingAddress.zipCode %></p>
+                        <% } %>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Your Products in This Order</h6>
+                        <table class="table table-sm mb-2">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Price</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% order.vendorItems.forEach(item => { %>
+                                    <tr>
+                                        <td><%= item.product.name %></td>
+                                        <td><%= item.quantity %></td>
+                                        <td>₹<%= item.price.toFixed(2) %></td>
+                                        <td>₹<%= (item.price * item.quantity).toFixed(2) %></td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                        <p class="text-end mb-0"><strong>Your Order Total: ₹<%= order.vendorTotal.toFixed(2) %></strong></p>
+                        <p class="text-end text-muted small mb-0">Full Order Total: ₹<%= order.totalAmount.toFixed(2) %></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% }) %>
+<% } else { %>
+    <div class="text-center py-5">
+        <h4 class="text-muted">No orders yet</h4>
+        <p>Orders containing your products will appear here.</p>
+    </div>
+<% } %>
+
+<%- include('../partials/footer') %>

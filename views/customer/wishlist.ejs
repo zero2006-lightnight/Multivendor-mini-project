@@ -1,0 +1,39 @@
+<%- include('../partials/header') %>
+
+<h2>My Wishlist</h2>
+
+<div class="row">
+
+<% products.forEach(product => { %>
+
+<div class="col-md-4 mb-4">
+
+<div class="card">
+
+<img
+src="<%= product.imageUrl %>"
+class="card-img-top"
+>
+
+<div class="card-body">
+
+<h5><%= product.name %></h5>
+
+<p>$<%= product.price %></p>
+
+<a
+href="/product/<%= product._id %>"
+class="btn btn-primary"
+>
+View
+</a>
+
+</div>
+</div>
+</div>
+
+<% }) %>
+
+</div>
+
+<%- include('../partials/footer') %>

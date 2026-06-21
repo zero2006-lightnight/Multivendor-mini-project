@@ -1,0 +1,124 @@
+<%- include('../partials/header') %>
+
+<style>
+    @media print {
+        .no-print { display: none !important; }
+        body { background: white !important; }
+        .card { border: 1px solid #ddd !important; box-shadow: none !important; }
+    }
+    .invoice-box {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 30px;
+        background: white;
+        border: 1px solid #eee;
+    }
+    .invoice-header {
+        border-bottom: 2px solid #333;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+    .invoice-details td {
+        padding: 5px 0;
+    }
+</style>
+
+<div class="no-print mb-3">
+    <a href="/orders" class="btn btn-outline-secondary">← Back to Orders</a>
+    <button onclick="window.print()" class="btn btn-primary ms-2">🖨️ Print / Save as PDF</button>
+</div>
+
+<div class="invoice-box">
+    <div class="invoice-header d-flex justify-content-between">
+        <div>
+            <h2>🧾 Invoice</h2>
+            <p class="text-muted mb-0">Multi-Vendor Marketplace</p>
+        </div>
+        <div class="text-end">
+            <h5>Order #<%= order._id %></h5>
+            <p class="text-muted mb-0"><%= new Date(order.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+            <p>
+                <span class="badge 
+                    <% if (order.status === 'Delivered') { %>bg-success
+                    <% } else if (order.status === 'Cancelled') { %>bg-danger
+                    <% } else if (order.status === 'Shipped') { %>bg-info
+                    <% } else { %>bg-warning text-dark<% } %>">
+                    <%= order.status %>
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h6 class="text-muted">Bill To</h6>
+            <p class="mb-0"><strong><%= user.username %></strong></p>
+            <p class="mb-0"><%= user.email %></p>
+            <% if (order.shippingAddress) { %>
+                <p class="mb-0"><%= order.shippingAddress.street %></p>
+                <p class="mb-0"><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> - <%= order.shippingAddress.zipCode %></p>
+            <% } %>
+        </div>
+        <div class="col-md-6 text-end">
+            <h6 class="text-muted">Payment Details</h6>
+            <% if (order.paymentId) { %>
+                <p class="mb-0">Payment ID: <strong><%= order.paymentId %></strong></p>
+            <% } %>
+            <% if (order.razorpayOrderId) { %>
+                <p class="mb-0">Order ID: <strong><%= order.razorpayOrderId %></strong></p>
+            <% } %>
+            <p class="mb-0">Method: Razorpay (Online)</p>
+        </div>
+    </div>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th class="text-end">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% order.products.forEach((item, idx) => { %>
+                <tr>
+                    <td><%= idx + 1 %></td>
+                    <td><%= item.product ? item.product.name : 'Product' %></td>
+                    <td><%= item.quantity %></td>
+                    <td>₹<%= item.price.toFixed(2) %></td>
+                    <td class="text-end">₹<%= (item.price * item.quantity).toFixed(2) %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-end">
+        <table class="table table-bordered" style="max-width: 300px;">
+            <tbody>
+                <% if (order.discount > 0) { %>
+                    <tr>
+                        <td>Subtotal</td>
+                        <td class="text-end">₹<%= (order.totalAmount / (1 - order.discount / 100)).toFixed(2) %></td>
+                    </tr>
+                    <tr>
+                        <td>Discount (<%= order.discount %>%)<% if (order.couponCode) { %> - <%= order.couponCode %><% } %></td>
+                        <td class="text-end text-success">-₹<%= ((order.totalAmount / (1 - order.discount / 100)) * order.discount / 100).toFixed(2) %></td>
+                    </tr>
+                <% } %>
+                <tr class="table-dark">
+                    <td><strong>Total</strong></td>
+                    <td class="text-end"><strong>₹<%= order.totalAmount.toFixed(2) %></strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-center mt-4 text-muted small">
+        <p>Thank you for your purchase!</p>
+        <p>Generated on <%= new Date().toLocaleString('en-IN') %></p>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

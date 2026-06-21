@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: multi-vendor-marketplace
+    runtime: node
+    plan: free
+    buildCommand: cd Source_Code && npm install
+    startCommand: cd Source_Code && node app.js
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - Source_Code/**
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: PORT
+        value: 10000
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: openrouter/free
+    healthCheckPath: /health

@@ -1,0 +1,101 @@
+<%- include('../partials/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Manage Orders</h2>
+    <a href="/admin/dashboard" class="btn btn-outline-secondary">← Back to Dashboard</a>
+</div>
+
+<% if (orders.length > 0) { %>
+    <% orders.forEach(order => { %>
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <strong>Order #<%= order._id %></strong>
+                    &mdash; <%= new Date(order.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                </span>
+                <div class="d-flex align-items-center gap-2">
+                    <form action="/admin/orders/update-status/<%= order._id %>" method="POST" class="d-flex align-items-center gap-2">
+                        <select name="status" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+                            <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                            <option value="Paid" <%= order.status === 'Paid' ? 'selected' : '' %>>Paid</option>
+                            <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                            <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                            <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                            <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                        </select>
+                    </form>
+                    <span class="badge 
+                        <% if (order.status === 'Delivered') { %>bg-success
+                        <% } else if (order.status === 'Cancelled') { %>bg-danger
+                        <% } else if (order.status === 'Shipped') { %>bg-info
+                        <% } else if (order.status === 'Processing') { %>bg-primary
+                        <% } else if (order.status === 'Paid') { %>bg-warning text-dark
+                        <% } else { %>bg-secondary<% } %>">
+                        <%= order.status %>
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Customer</h6>
+                        <p class="mb-1"><strong><%= order.customer ? order.customer.username : 'N/A' %></strong></p>
+                        <p class="text-muted small"><%= order.customer ? order.customer.email : '' %></p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Shipping Address</h6>
+                        <% if (order.shippingAddress) { %>
+                            <p class="mb-0"><%= order.shippingAddress.street %></p>
+                            <p class="mb-0"><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %></p>
+                            <p class="mb-0"><%= order.shippingAddress.zipCode %></p>
+                        <% } else { %>
+                            <p class="text-muted">No address</p>
+                        <% } %>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <h6 class="text-muted">Payment</h6>
+                        <p class="mb-0"><strong>Total: ₹<%= order.totalAmount.toFixed(2) %></strong></p>
+                        <% if (order.paymentId) { %>
+                            <p class="text-muted small mb-0">Payment ID: <%= order.paymentId %></p>
+                        <% } %>
+                        <% if (order.discount > 0) { %>
+                            <p class="text-success small mb-0"><%= order.discount %>% coupon discount applied</p>
+                        <% } %>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h6 class="text-muted">Products</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% order.products.forEach(item => { %>
+                                <tr>
+                                    <td><%= item.product ? item.product.name : 'Deleted Product' %></td>
+                                    <td><%= item.quantity %></td>
+                                    <td>₹<%= item.price.toFixed(2) %></td>
+                                    <td>₹<%= (item.price * item.quantity).toFixed(2) %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    <% }) %>
+<% } else { %>
+    <div class="text-center py-5">
+        <h4 class="text-muted">No orders yet</h4>
+    </div>
+<% } %>
+
+<%- include('../partials/footer') %>

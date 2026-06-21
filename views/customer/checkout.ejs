@@ -1,0 +1,113 @@
+
+<%- include('../partials/header') %>
+
+<div class="row">
+    <div class="col-md-6">
+        <h2>Order Summary</h2>
+        <ul class="list-group mb-3">
+            <% cart.products.forEach(item => { %>
+                <li class="list-group-item d-flex justify-content-between lh-condensed">
+                    <div>
+                        <h6 class="my-0"><%= item.product.name %></h6>
+                        <small class="text-muted">Quantity: <%= item.quantity %></small>
+                    </div>
+                    <span class="text-muted">$<%= (item.product.price * item.quantity).toFixed(2) %></span>
+                </li>
+            <% }) %>
+            <li class="list-group-item">
+    <% if (discount > 0) { %>
+
+        <p><strong>Original Total:</strong>
+        $<%= cart.totalAmount.toFixed(2) %></p>
+
+        <p><strong>Coupon Applied:</strong>
+        <%= discount %>% OFF</p>
+
+        <h4 style="color:green">
+            Final Total:
+            $<%= finalTotal.toFixed(2) %>
+        </h4>
+
+    <% } else { %>
+
+        <strong>Total (USD):
+            $<%= cart.totalAmount.toFixed(2) %>
+        </strong>
+
+    <% } %>
+</li>
+        </ul>
+    </div>
+    <div class="col-md-6">
+        <h2>Shipping Address</h2>
+        <form action="/order" method="POST">
+            <div class="mb-3">
+                <label for="street" class="form-label">Street</label>
+                <input type="text" class="form-control" id="street" name="street" required>
+            </div>
+            <div class="mb-3">
+                <label for="city" class="form-label">City</label>
+                <input type="text" class="form-control" id="city" name="city" required>
+            </div>
+            <div class="mb-3">
+                <label for="state" class="form-label">State</label>
+                <input type="text" class="form-control" id="state" name="state" required>
+            </div>
+            <div class="mb-3">
+                <label for="zipCode" class="form-label">Zip Code</label>
+                <input type="text" class="form-control" id="zipCode" name="zipCode" required>
+            </div>
+            <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+<input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+<input type="hidden" name="razorpay_signature" id="razorpay_signature">
+            <button
+    type="button"
+    id="rzp-button"
+    class="btn btn-success btn-lg btn-block">
+    Pay with Razorpay
+</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+document.getElementById('rzp-button').onclick = async function () {
+
+    const response = await fetch('/create-razorpay-order', {
+        method: 'POST'
+    });
+
+    const order = await response.json();
+
+    const options = {
+        key: "<%= razorpayKey %>",
+        amount: order.amount,
+        currency: order.currency,
+        name: "Geekstrom Marketplace",
+        description: "Order Payment",
+        order_id: order.id,
+
+       handler: function(response) {
+
+    document.getElementById('razorpay_payment_id').value =
+        response.razorpay_payment_id;
+
+    document.getElementById('razorpay_order_id').value =
+        response.razorpay_order_id;
+
+    document.getElementById('razorpay_signature').value =
+        response.razorpay_signature;
+
+    document.querySelector('form').submit();
+}
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+};
+</script>
+<%- include('../partials/footer') %>
+
+
