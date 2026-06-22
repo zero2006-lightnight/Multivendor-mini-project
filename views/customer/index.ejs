@@ -5,12 +5,12 @@
 
 <!-- AI: Trending Products Section -->
 <% if (typeof trending !== 'undefined' && trending.length > 0) { %>
-<div class="mb-4 p-3 bg-light rounded shadow-sm">
+<div class="trending-section">
     <h4>🔥 Trending Products <small class="text-muted">— AI Recommended</small></h4>
     <div class="row">
         <% trending.forEach(p => { %>
         <div class="col-md-2 mb-3">
-            <div class="card h-100 shadow-sm" style="cursor:pointer;" onclick="window.location='/product/<%= p._id %>'">
+            <div class="card trending-card h-100 shadow-sm" style="cursor:pointer;" onclick="window.location='/product/<%= p._id %>'">
                 <% const tImg = p.image || p.imageUrl || '/images/placeholder.png'; %>
                 <img src="<%= tImg %>" class="card-img-top" style="height:100px;object-fit:cover;" alt="<%= p.name %>">
                 <div class="card-body p-2 text-center">
@@ -24,7 +24,7 @@
 </div>
 <% } %>
 
-<form action="/search" method="GET" class="mb-4 p-3 bg-light rounded shadow-sm">
+<form action="/search" method="GET" class="search-container">
     <div class="row g-3">
         <div class="col-md-4">
             <input type="text" name="search" placeholder="🔍 Search products..." value="<%= typeof search !== 'undefined' ? search : '' %>" class="form-control">
@@ -64,7 +64,7 @@
     <% } %>
     <% products.forEach(product => { %>
         <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm">
+            <div class="card product-card h-100 shadow-sm">
                 <% const img = product.image || product.imageUrl || '/images/placeholder.png'; %>
                 <img src="<%= img %>" class="card-img-top" alt="<%= product.name %>" style="height: 200px; object-fit: cover;">
                 <div class="card-body d-flex flex-column">

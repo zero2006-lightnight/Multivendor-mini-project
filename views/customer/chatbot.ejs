@@ -1,63 +1,443 @@
 <%- include('../partials/header') %>
 
 <style>
-.chatbot-container { max-width: 800px; margin: 0 auto; }
-.chat-messages { height: 500px; overflow-y: auto; padding: 15px; background: #f8f9fa; border-radius: 12px; margin-bottom: 15px; }
-.chat-message { margin-bottom: 15px; display: flex; gap: 10px; }
-.chat-message.user { flex-direction: row-reverse; }
-.chat-bubble { max-width: 75%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.5; white-space: pre-line; }
-.chat-message.bot .chat-bubble { background: #fff; border: 1px solid #e0e0e0; border-bottom-left-radius: 4px; }
-.chat-message.user .chat-bubble { background: #007bff; color: #fff; border-bottom-right-radius: 4px; }
-.chat-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-.chat-message.bot .chat-avatar { background: #e3f2fd; }
-.chat-message.user .chat-avatar { background: #007bff22; }
-.chat-input-area { display: flex; gap: 10px; }
-.chat-input-area input { flex: 1; border-radius: 25px; padding: 12px 20px; border: 2px solid #e0e0e0; font-size: 14px; }
-.chat-input-area input:focus { outline: none; border-color: #007bff; }
-.chat-input-area button { border-radius: 25px; padding: 12px 24px; }
-.typing-indicator { display: flex; gap: 4px; padding: 8px 16px; }
-.typing-dot { width: 8px; height: 8px; background: #999; border-radius: 50%; animation: typing 1.4s infinite; }
+/* ============================================
+   AI CHATBOT - MODERN DARK THEME
+   ============================================ */
+.chatbot-wrapper {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 1rem;
+    min-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.chatbot-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.chatbot-header h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.4rem;
+}
+
+.chatbot-header p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.chatbot-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    color: #22c55e;
+    font-weight: 600;
+    margin-top: 0.75rem;
+}
+
+.chatbot-status::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: statusPulse 2s infinite;
+}
+
+@keyframes statusPulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+}
+
+/* Chat Container */
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+
+/* Messages Area */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 450px;
+    max-height: 550px;
+    scroll-behavior: smooth;
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 5px;
+}
+.chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+.chat-messages::-webkit-scrollbar-thumb {
+    background: var(--bg-elevated);
+    border-radius: 10px;
+}
+
+/* Message Bubbles */
+.chat-message {
+    display: flex;
+    gap: 10px;
+    max-width: 85%;
+    animation: msgFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chat-message.bot {
+    align-self: flex-start;
+}
+
+.chat-message.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+@keyframes msgFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.chat-message.bot .chat-avatar {
+    background: rgba(99, 102, 241, 0.15);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+.chat-message.user .chat-avatar {
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.25);
+}
+
+.chat-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.chat-bubble {
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 0.88rem;
+    line-height: 1.65;
+    white-space: pre-line;
+    word-wrap: break-word;
+}
+
+.chat-message.bot .chat-bubble {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-bottom-left-radius: 4px;
+    color: var(--text-primary);
+}
+
+.chat-message.user .chat-bubble {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-bottom-right-radius: 4px;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+/* Product Cards in Chat */
+.chat-products {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.chat-product-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 10px;
+    font-size: 0.78rem;
+    max-width: 180px;
+    flex: 0 0 auto;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.chat-product-card:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+    color: inherit;
+}
+
+.chat-product-card img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    opacity: 1 !important;
+}
+
+.chat-product-card .product-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+    font-size: 0.8rem;
+}
+
+.chat-product-card .product-price {
+    color: var(--success);
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.chat-product-card .product-category {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    margin-top: 2px;
+}
+
+/* Quick Replies */
+.quick-replies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.quick-reply {
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--accent-primary);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.quick-reply:hover {
+    background: rgba(99, 102, 241, 0.18);
+    border-color: var(--accent-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(99, 102, 241, 0.2);
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 4px 8px;
+    align-items: center;
+}
+
+.typing-dot {
+    width: 7px;
+    height: 7px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    animation: typingBounce 1.4s infinite;
+}
+
 .typing-dot:nth-child(2) { animation-delay: 0.2s; }
 .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes typing { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-8px); } }
-.chat-product-card { display: inline-block; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 8px 12px; margin: 5px 5px 5px 0; font-size: 12px; max-width: 200px; }
-.chat-product-card .product-name { font-weight: 600; color: #333; }
-.chat-product-card .product-price { color: #28a745; font-weight: bold; }
-.chat-product-card a { text-decoration: none; color: inherit; }
-.quick-replies { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.quick-reply { background: #e3f2fd; border: 1px solid #90caf9; border-radius: 20px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
-.quick-reply:hover { background: #bbdefb; }
-.ai-badge { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+
+@keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+    30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* Input Area */
+.chat-input-wrapper {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.chat-input-area {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.chat-input-area input {
+    flex: 1;
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 999px !important;
+    padding: 12px 20px !important;
+    font-size: 0.9rem !important;
+    color: var(--text-primary) !important;
+    transition: all 0.2s ease;
+}
+
+.chat-input-area input::placeholder {
+    color: var(--text-muted) !important;
+}
+
+.chat-input-area input:focus {
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
+    background: var(--bg-elevated) !important;
+}
+
+.send-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    border: none;
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.send-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.send-btn:active {
+    transform: scale(0.95);
+}
+
+/* Error message styling */
+.chat-message.error .chat-bubble {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+/* Welcome Card */
+.welcome-card {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.05));
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.welcome-card h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.welcome-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.welcome-card li {
+    padding: 4px 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .chatbot-wrapper {
+        padding: 0.5rem;
+    }
+    .chatbot-header h2 {
+        font-size: 1.4rem;
+    }
+    .chat-messages {
+        min-height: 350px;
+        max-height: 450px;
+        padding: 1rem;
+    }
+    .chat-message {
+        max-width: 92%;
+    }
+}
 </style>
 
-<div class="container chatbot-container mt-4">
-    <h2>🤖 AI Shopping Assistant <span class="ai-badge"><%= aiEnabled ? (aiProvider === 'openrouter' ? 'OpenRouter AI' : aiProvider === 'openai' ? 'GPT Powered' : 'AI Powered') : 'Smart Rules' %></span></h2>
-    <p class="text-muted mb-3">Ask me about products, orders, recommendations, or anything else!</p>
+<div class="chatbot-wrapper">
+    <!-- Header -->
+    <div class="chatbot-header">
+        <h2>🤖 AI Shopping Assistant <span class="ai-badge"><%= aiEnabled ? (aiProvider === 'openrouter' ? 'OpenRouter AI' : aiProvider === 'openai' ? 'GPT Powered' : 'AI Powered') : 'Smart Rules' %></span></h2>
+        <p>Ask me about products, orders, recommendations, or anything else!</p>
+        <div class="chatbot-status">Online — Ready to help</div>
+    </div>
 
-    <div class="chat-messages" id="chatMessages">
-        <div class="chat-message bot">
-            <div class="chat-avatar">🤖</div>
-            <div>
-                <div class="chat-bubble">
-                    Hello! 👋 I'm your AI shopping assistant. I can help you:
-                    • 🔍 Find products
-                    • 💰 Check prices
-                    • 📦 Check stock availability
-                    • 📋 Track your orders
-                    • 🌟 Get recommendations
-                </div>
-                <div class="quick-replies">
-                    <span class="quick-reply" onclick="sendQuick('Show me trending products')">🌟 Trending</span>
-                    <span class="quick-reply" onclick="sendQuick('What categories do you have?')">📂 Categories</span>
-                    <span class="quick-reply" onclick="sendQuick('What is your return policy?')">📋 Returns</span>
+    <!-- Chat Container -->
+    <div class="chat-container">
+        <!-- Messages -->
+        <div class="chat-messages" id="chatMessages">
+            <!-- Welcome Message -->
+            <div class="chat-message bot">
+                <div class="chat-avatar">🤖</div>
+                <div class="chat-content">
+                    <div class="welcome-card">
+                        <h4>Welcome! 👋</h4>
+                        <ul>
+                            <li>🔍 Search & discover products</li>
+                            <li>💰 Check prices & availability</li>
+                            <li>📋 Track your orders</li>
+                            <li>🌟 Get personalized recommendations</li>
+                        </ul>
+                    </div>
+                    <div class="quick-replies">
+                        <span class="quick-reply" onclick="sendQuick('Show me trending products')">🔥 Trending</span>
+                        <span class="quick-reply" onclick="sendQuick('What categories do you have?')">📂 Categories</span>
+                        <span class="quick-reply" onclick="sendQuick('What is your return policy?')">📋 Returns</span>
+                        <span class="quick-reply" onclick="sendQuick('Help me find electronics')">⚡ Electronics</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="chat-input-area">
-        <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter')sendMessage()">
-        <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+        <!-- Input -->
+        <div class="chat-input-wrapper">
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Ask me anything..." autocomplete="off" onkeypress="if(event.key==='Enter')sendMessage()">
+                <button class="send-btn" onclick="sendMessage()" title="Send message" aria-label="Send message">➤</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -66,35 +446,47 @@ const chatMessages = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
 
 function scrollToBottom() {
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML.replace(/\n/g, '<br>');
 }
 
 function addMessage(text, products, isUser) {
     const div = document.createElement('div');
     div.className = `chat-message ${isUser ? 'user' : 'bot'}`;
-    const avatar = isUser ? '👤' : '🤖';
-    let html = `<div class="chat-avatar">${avatar}</div><div><div class="chat-bubble">${escapeHtml(text)}</div>`;
 
+    const avatar = isUser ? '👤' : '🤖';
+    let html = `<div class="chat-avatar">${avatar}</div><div class="chat-content">`;
+    html += `<div class="chat-bubble">${escapeHtml(text)}</div>`;
+
+    // Product cards
     if (products && products.length > 0) {
-        html += '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">';
+        html += '<div class="chat-products">';
         products.forEach(p => {
             const img = p.image || p.imageUrl || '';
             html += `<a href="/product/${p._id}" class="chat-product-card">
-                ${img ? `<img src="${img}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:4px;" alt="${p.name}">` : ''}
+                ${img ? `<img src="${img}" alt="${escapeHtml(p.name)}" style="opacity:1 !important;">` : ''}
                 <div class="product-name">${escapeHtml(p.name)}</div>
                 <div class="product-price">₹${p.price.toFixed(2)}</div>
-                <div style="color:#666;font-size:11px;">${escapeHtml(p.category)}</div>
+                <div class="product-category">${escapeHtml(p.category)}</div>
             </a>`;
         });
         html += '</div>';
     }
 
+    // Quick replies on bot messages
     if (!isUser) {
         html += `<div class="quick-replies">
-            <span class="quick-reply" onclick="sendQuick('Show me trending products')">🌟 Trending</span>
+            <span class="quick-reply" onclick="sendQuick('Show me trending products')">🔥 Trending</span>
             <span class="quick-reply" onclick="sendQuick('What do you sell?')">📂 Browse</span>
+            <span class="quick-reply" onclick="sendQuick('Help me find something')">🔍 Search</span>
         </div>`;
     }
+
     html += '</div>';
     div.innerHTML = html;
     chatMessages.appendChild(div);
@@ -105,7 +497,17 @@ function addTypingIndicator() {
     const div = document.createElement('div');
     div.className = 'chat-message bot';
     div.id = 'typingIndicator';
-    div.innerHTML = `<div class="chat-avatar">🤖</div><div class="chat-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+    div.innerHTML = `
+        <div class="chat-avatar">🤖</div>
+        <div class="chat-content">
+            <div class="chat-bubble">
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        </div>`;
     chatMessages.appendChild(div);
     scrollToBottom();
 }
@@ -115,16 +517,11 @@ function removeTypingIndicator() {
     if (el) el.remove();
 }
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML.replace(/\n/g, '<br>');
-}
-
 async function sendMessage() {
     const message = chatInput.value.trim();
     if (!message) return;
     chatInput.value = '';
+    chatInput.focus();
     addMessage(message, [], true);
     addTypingIndicator();
 
@@ -148,6 +545,8 @@ function sendQuick(message) {
     sendMessage();
 }
 
+// Focus input on load
+chatInput.focus();
 scrollToBottom();
 </script>
 
