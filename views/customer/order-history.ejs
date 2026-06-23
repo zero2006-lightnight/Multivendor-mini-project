@@ -1,59 +1,70 @@
-
 <%- include('../partials/header') %>
 
-<h2>My Orders</h2>
-
-<% if (orders.length > 0) { %>
-    <% orders.forEach(order => { %>
-        <div class="card mb-3">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>
-                    Order #<%= order._id %>
-                    &mdash; <%= new Date(order.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) %>
-                </span>
-                <span class="badge 
-                    <% if (order.status === 'Delivered') { %>bg-success
-                    <% } else if (order.status === 'Cancelled') { %>bg-danger
-                    <% } else if (order.status === 'Shipped') { %>bg-info
-                    <% } else if (order.status === 'Processing') { %>bg-primary
-                    <% } else if (order.status === 'Paid') { %>bg-warning text-dark
-                    <% } else { %>bg-secondary<% } %>">
-                    <%= order.status %>
-                </span>
-            </div>
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <p class="mb-1"><strong>Total:</strong> ₹<%= order.totalAmount.toFixed(2) %></p>
-                        <% if (order.discount > 0) { %>
-                            <p class="text-success small mb-1"><%= order.discount %>% coupon discount applied<% if (order.couponCode) { %> (<%= order.couponCode %>)<% } %></p>
-                        <% } %>
-                        <% if (order.paymentId) { %>
-                            <p class="text-muted small mb-1">Payment ID: <%= order.paymentId %></p>
-                        <% } %>
-                    </div>
-                    <a href="/invoice/<%= order._id %>" class="btn btn-outline-primary btn-sm">🧾 Invoice</a>
-                </div>
-                <h6 class="mt-2">Products:</h6>
-                <ul class="list-group list-group-flush mb-2">
-                    <% order.products.forEach(item => { %>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span><%= item.product ? item.product.name : 'Product' %> (x<%= item.quantity %>)</span>
-                            <span>₹<%= (item.price * item.quantity).toFixed(2) %></span>
-                        </li>
-                    <% }) %>
-                </ul>
-            </div>
-        </div>
-    <% }) %>
-<% } else { %>
-    <div class="text-center py-5">
-        <h4 class="text-muted">No orders yet</h4>
-        <p>Start shopping to see your orders here!</p>
-        <a href="/" class="btn btn-primary">Browse Products</a>
+<div class="orders-page">
+    <div class="page-header">
+        <h2>My Orders</h2>
     </div>
-<% } %>
+
+    <% if (orders.length > 0) { %>
+        <% orders.forEach(order => { %>
+            <div class="order-card">
+                <div class="order-card-header">
+                    <div>
+                        <span class="order-id">#<%= order._id.toString().slice(-8).toUpperCase() %></span>
+                        <span style="margin-left: 0.75rem; font-size: 0.82rem; color: var(--text-secondary);">
+                            <%= new Date(order.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) %>
+                        </span>
+                    </div>
+                    <span class="badge
+                        <% if (order.status === 'Delivered') { %>bg-success
+                        <% } else if (order.status === 'Cancelled') { %>bg-danger
+                        <% } else if (order.status === 'Shipped') { %>bg-info
+                        <% } else if (order.status === 'Processing') { %>bg-primary
+                        <% } else if (order.status === 'Paid') { %>bg-warning
+                        <% } else { %>bg-secondary<% } %>">
+                        <%= order.status %>
+                    </span>
+                </div>
+                <div class="order-card-body">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <div style="font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 1.1rem;">
+                                &#8377;<%= order.totalAmount.toFixed(2) %>
+                            </div>
+                            <% if (order.discount > 0) { %>
+                                <div style="font-size: 0.78rem; color: var(--sage); margin-top: 0.25rem;">
+                                    <%= order.discount %>% coupon discount applied<% if (order.couponCode) { %> (<%= order.couponCode %>)<% } %>
+                                </div>
+                            <% } %>
+                            <% if (order.paymentId) { %>
+                                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.25rem; font-family: 'JetBrains Mono', monospace;">
+                                    Payment: <%= order.paymentId %>
+                                </div>
+                            <% } %>
+                        </div>
+                        <a href="/invoice/<%= order._id %>" class="btn btn-outline-secondary btn-sm">Invoice</a>
+                    </div>
+
+                    <div style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.75rem;">Products</div>
+                    <ul class="order-product-list">
+                        <% order.products.forEach(item => { %>
+                            <li>
+                                <span><%= item.product ? item.product.name : 'Product' %> (x<%= item.quantity %>)</span>
+                                <span style="font-family: 'JetBrains Mono', monospace; font-weight: 500;">&#8377;<%= (item.price * item.quantity).toFixed(2) %></span>
+                            </li>
+                        <% }) %>
+                    </ul>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="empty-state">
+            <div class="empty-state-icon">&#128230;</div>
+            <h3>No orders yet</h3>
+            <p>Start shopping to see your orders here.</p>
+            <a href="/" class="btn btn-primary">Browse Products</a>
+        </div>
+    <% } %>
+</div>
 
 <%- include('../partials/footer') %>
-
-

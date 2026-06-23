@@ -1,12 +1,10 @@
+// Theme toggle is handled by animations.js (loaded in footer)
+// Do NOT add a duplicate handler here — it causes 'Identifier already declared' errors.
 
-// Add your custom javascript here
+// Toggle shop name field visibility on registration
 function toggleShopName(role) {
-    const shopNameInput = document.getElementById('shopNameInput');
-    if (role === 'vendor') {
-        shopNameInput.style.display = 'block';
-    } else {
-        shopNameInput.style.display = 'none';
+    var field = document.getElementById('shopNameField');
+    if (field) {
+        field.style.display = role === 'vendor' ? 'block' : 'none';
     }
 }
-
-

@@ -23,9 +23,6 @@ exports.postRegister = async (req, res) => {
             errors.push('Password must be at least 6 characters');
         }
         const userRole = ALLOWED_ROLES.includes(role) ? role : 'customer';
-        if (role && !ALLOWED_ROLES.includes(role)) {
-            errors.push('Invalid role selected');
-        }
         if (userRole === 'vendor' && (!shopName || shopName.trim().length < 2)) {
             errors.push('Shop name is required for vendors');
         }

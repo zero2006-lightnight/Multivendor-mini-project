@@ -1,21 +1,32 @@
 <%- include('../partials/header') %>
 
-<div class="container mt-4">
-<h1>Products</h1>
+<!-- Hero — Immersive, centered, generous whitespace -->
+<section class="hero-section">
+    <div class="hero-eyebrow">Independent makers, curated selection</div>
+    <h1 class="hero-title">Find something<br><span class="accent">worth keeping.</span></h1>
+    <p class="hero-subtitle">A marketplace of independent vendors, each bringing something different. Browse, discover, and support the makers behind the products.</p>
+    <div class="hero-actions">
+        <a href="#products" class="btn btn-primary">Shop now</a>
+        <a href="/auth/register" class="btn btn-outline-secondary">Open a shop</a>
+    </div>
+</section>
 
-<!-- AI: Trending Products Section -->
+<!-- Trending -->
 <% if (typeof trending !== 'undefined' && trending.length > 0) { %>
 <div class="trending-section">
-    <h4>🔥 Trending Products <small class="text-muted">— AI Recommended</small></h4>
+    <div class="trending-title">
+        <span class="accent-dot"></span>
+        Trending now
+    </div>
     <div class="row">
         <% trending.forEach(p => { %>
-        <div class="col-md-2 mb-3">
-            <div class="card trending-card h-100 shadow-sm" style="cursor:pointer;" onclick="window.location='/product/<%= p._id %>'">
-                <% const tImg = p.image || p.imageUrl || '/images/placeholder.png'; %>
-                <img src="<%= tImg %>" class="card-img-top" style="height:100px;object-fit:cover;" alt="<%= p.name %>">
+        <div class="col-md-2 col-4 mb-3">
+            <div class="card trending-card h-100" style="cursor:pointer;" onclick="window.location='/product/<%= p._id %>'">
+                <% const tImg = p.image || '/images/placeholder.png'; %>
+                <img src="<%= tImg %>" class="card-img-top" style="height:120px;object-fit:cover;" alt="<%= p.name %>">
                 <div class="card-body p-2 text-center">
-                    <small class="card-title fw-bold"><%= p.name.substring(0, 15) %><%= p.name.length > 15 ? '...' : '' %></small>
-                    <div class="text-success fw-bold">₹<%= p.price.toFixed(0) %></div>
+                    <small class="card-title" style="font-size:0.8rem;"><%= p.name.substring(0, 15) %><%= p.name.length > 15 ? '...' : '' %></small>
+                    <div class="price-tag" style="font-size:0.85rem;">&#8377;<%= p.price.toFixed(0) %></div>
                 </div>
             </div>
         </div>
@@ -24,67 +35,163 @@
 </div>
 <% } %>
 
+<!-- Search & Filter -->
 <form action="/search" method="GET" class="search-container">
-    <div class="row g-3">
+    <div class="row g-3 align-items-end">
         <div class="col-md-4">
-            <input type="text" name="search" placeholder="🔍 Search products..." value="<%= typeof search !== 'undefined' ? search : '' %>" class="form-control">
+            <input type="text" name="search" placeholder="Search products..." value="<%= typeof search !== 'undefined' ? search : '' %>" class="form-control">
         </div>
         <div class="col-md-2">
             <select name="category" class="form-select">
-                <option value="">All Categories</option>
-                <option value="Electronics" <%= typeof category !== 'undefined' && category === 'Electronics' ? 'selected' : '' %>>Electronics</option>
-                <option value="Fashion" <%= typeof category !== 'undefined' && category === 'Fashion' ? 'selected' : '' %>>Fashion</option>
-                <option value="Books" <%= typeof category !== 'undefined' && category === 'Books' ? 'selected' : '' %>>Books</option>
-                <option value="Home" <%= typeof category !== 'undefined' && category === 'Home' ? 'selected' : '' %>>Home</option>
-                <option value="Sports" <%= typeof category !== 'undefined' && category === 'Sports' ? 'selected' : '' %>>Sports</option>
-                <option value="Accessories" <%= typeof category !== 'undefined' && category === 'Accessories' ? 'selected' : '' %>>Accessories</option>
+                <option value="">All categories</option>
+                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                    <% categories.forEach(cat => { %>
+                        <option value="<%= cat %>" <%= typeof category !== 'undefined' && category === cat ? 'selected' : '' %>><%= cat %></option>
+                    <% }) %>
+                <% } %>
             </select>
         </div>
         <div class="col-md-2">
-            <input type="number" name="minPrice" placeholder="Min ₹" min="0" step="0.01" value="<%= typeof minPrice !== 'undefined' ? minPrice : '' %>" class="form-control">
+            <input type="number" name="minPrice" placeholder="Min &#8377;" min="0" step="0.01" value="<%= typeof minPrice !== 'undefined' ? minPrice : '' %>" class="form-control">
         </div>
         <div class="col-md-2">
-            <input type="number" name="maxPrice" placeholder="Max ₹" min="0" step="0.01" value="<%= typeof maxPrice !== 'undefined' ? maxPrice : '' %>" class="form-control">
+            <input type="number" name="maxPrice" placeholder="Max &#8377;" min="0" step="0.01" value="<%= typeof maxPrice !== 'undefined' ? maxPrice : '' %>" class="form-control">
         </div>
-        <div class="col-md-2 d-flex gap-1">
+        <div class="col-md-2 d-flex gap-2">
             <button type="submit" class="btn btn-primary flex-grow-1">Filter</button>
             <a href="/" class="btn btn-outline-secondary">Reset</a>
         </div>
     </div>
 </form>
 
-<p class="text-muted">Total Products: <strong><%= products.length %></strong></p>
+<!-- Products -->
+<div id="products" style="margin-bottom:0.75rem;">
+    <span class="hero-eyebrow hero-eyebrow--tight">All products &mdash; <%= products.length %></span>
+</div>
 
 <div class="row">
     <% if (products.length === 0) { %>
         <div class="col-12 text-center py-5">
-            <h4 class="text-muted">No products found</h4>
-            <p>Try adjusting your search or filters.</p>
+            <h4 style="color:var(--text-muted);font-size:1.3rem;font-family:'Playfair Display',serif;">No products found</h4>
+            <p style="color:var(--text-muted);font-size:0.9rem;">Try adjusting your search or filters.</p>
         </div>
     <% } %>
     <% products.forEach(product => { %>
         <div class="col-md-4 mb-4">
-            <div class="card product-card h-100 shadow-sm">
-                <% const img = product.image || product.imageUrl || '/images/placeholder.png'; %>
-                <img src="<%= img %>" class="card-img-top" alt="<%= product.name %>" style="height: 200px; object-fit: cover;">
+            <div class="card product-card h-100">
+                <% const img = product.image || '/images/placeholder.png'; %>
+                <img src="<%= img %>" class="card-img-top" alt="<%= product.name %>" style="height: 240px; object-fit: cover;">
                 <div class="card-body d-flex flex-column">
+                    <span class="badge bg-secondary" style="width: fit-content;margin-bottom:0.5rem;"><%= product.category %></span>
                     <h5 class="card-title"><%= product.name %></h5>
-                    <span class="badge bg-secondary mb-2" style="width: fit-content;"><%= product.category %></span>
-                    <p class="card-text text-muted small"><%= product.description.substring(0, 80) %><%= product.description.length > 80 ? '...' : '' %></p>
-                    <div class="mt-auto">
-                        <h5 class="text-success">₹<%= product.price.toFixed(2) %></h5>
+                    <p style="color:var(--text-muted);font-size:0.82rem;line-height:1.6;margin-bottom:0.75rem;"><%= product.description.substring(0, 80) %><%= product.description.length > 80 ? '...' : '' %></p>
+                    <div class="mt-auto" style="display:flex;align-items:center;justify-content:space-between;">
+                        <div class="price-tag">&#8377;<%= product.price.toFixed(2) %></div>
                         <% if (product.stock > 0) { %>
-                            <span class="badge bg-success">In Stock (<%= product.stock %>)</span>
+                            <span class="badge bg-success">In stock</span>
                         <% } else { %>
-                            <span class="badge bg-danger">Out of Stock</span>
+                            <span class="badge bg-danger">Out of stock</span>
                         <% } %>
-                        <a href="/product/<%= product._id %>" class="btn btn-primary btn-sm mt-2 w-100">View Details</a>
+                    </div>
+                    <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
+                        <a href="/product/<%= product._id %>" class="btn btn-outline-secondary btn-sm" style="flex:1;">View</a>
+                        <% if (product.stock > 0) { %>
+                        <button type="button" class="btn btn-primary btn-sm" style="flex:1;" onclick="addToCartListing('<%= product._id %>', this)">Add to Cart</button>
+                        <% } %>
                     </div>
                 </div>
             </div>
         </div>
     <% }) %>
 </div>
-</div>
+
+
+<script>
+async function addToCartListing(productId, btn) {
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Adding...';
+    try {
+        const response = await fetch('/cart/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `productId=${productId}&quantity=1`
+        });
+        if (response.ok || response.redirected) {
+            btn.textContent = '✓ Added!';
+            btn.style.background = 'var(--sage)';
+            showToast('Product added to cart!', 'success');
+            setTimeout(() => { btn.textContent = originalText; btn.style.background = ''; btn.disabled = false; }, 2000);
+        } else {
+            btn.textContent = originalText;
+            btn.disabled = false;
+            showToast('Failed to add. Please login first.', 'error');
+        }
+    } catch(e) {
+        btn.textContent = originalText;
+        btn.disabled = false;
+        showToast('Network error. Please try again.', 'error');
+    }
+}
+function showToast(message, type) {
+    let toast = document.getElementById('cart-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'cart-toast';
+        toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;z-index:9999;padding:0.85rem 1.5rem;border-radius:var(--radius-md);font-family:"DM Sans",sans-serif;font-size:0.88rem;font-weight:500;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.15);transition:all 0.3s ease;opacity:0;transform:translateY(20px);pointer-events:none;';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.background = type === 'success' ? '#7A9E7E' : '#C47070';
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+    toast.style.pointerEvents = 'auto';
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(20px)'; }, 3000);
+}
+</script>
+
+<script>
+async function addToCartListing(productId, btn) {
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Adding...';
+    try {
+        const response = await fetch('/cart/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `productId=${productId}&quantity=1`
+        });
+        if (response.ok || response.redirected) {
+            btn.textContent = '✓ Added!';
+            btn.style.background = 'var(--sage)';
+            showToast('Product added to cart!', 'success');
+            setTimeout(() => { btn.textContent = originalText; btn.style.background = ''; btn.disabled = false; }, 2000);
+        } else {
+            btn.textContent = originalText;
+            btn.disabled = false;
+            showToast('Failed to add. Please login first.', 'error');
+        }
+    } catch(e) {
+        btn.textContent = originalText;
+        btn.disabled = false;
+        showToast('Network error. Please try again.', 'error');
+    }
+}
+function showToast(message, type) {
+    let toast = document.getElementById('cart-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'cart-toast';
+        toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;z-index:9999;padding:0.85rem 1.5rem;border-radius:var(--radius-md);font-family:\"DM Sans\",sans-serif;font-size:0.88rem;font-weight:500;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.15);transition:all 0.3s ease;opacity:0;transform:translateY(20px);pointer-events:none;';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.background = type === 'success' ? '#7A9E7E' : '#C47070';
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+    toast.style.pointerEvents = 'auto';
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(20px)'; }, 3000);
+}
+</script>
 
 <%- include('../partials/footer') %>

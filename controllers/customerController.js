@@ -1,4 +1,5 @@
 
+const crypto = require('crypto');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 const Review = require('../models/Review');
@@ -80,17 +81,17 @@ const sendVendorOrderNotification = async (order, vendorUser) => {
     }
 };
 
+
+
 const getCart = (session) => {
-    if (!session.cart) {
-        session.cart = { products: [], totalAmount: 0 };
-    }
+    session.cart = session.cart || { products: [], totalAmount: 0 };
     return session.cart;
 };
 
 exports.getProducts = async (req, res) => {
     try {
         const products = await Product.find();
-        const categories = await Product.distinct('category');
+        const categories = (await Product.distinct('category')).sort();
         const trending = await aiRecommendations.getTrendingProducts(6);
         res.render('customer/index', { products, categories, trending, search: '', category: '', minPrice: '', maxPrice: '' });
     } catch (error) {
@@ -113,7 +114,7 @@ exports.getProductDetails = async (req, res) => {
         else sortOption = { createdAt: -1 };
 
         const reviews = await Review.find({ product: req.params.id })
-            .populate('user').populate('order').sort(sortOption);
+            .populate('user').sort(sortOption);
 
         let averageRating = 0;
         const reviewCount = reviews.length;
@@ -244,7 +245,21 @@ exports.postOrder = async (req, res) => {
         return res.redirect('/');
     }
 
+    if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+        req.flash('error_msg', 'Payment information missing');
+        return res.redirect('/checkout');
+    }
+
     try {
+        const expectedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+            .update(razorpay_order_id + '|' + razorpay_payment_id)
+            .digest('hex');
+
+        if (expectedSignature !== razorpay_signature) {
+            req.flash('error_msg', 'Payment verification failed');
+            return res.redirect('/checkout');
+        }
         // Validate stock for all items before creating order
         for (const item of cart.products) {
             const product = await Product.findById(item.product._id);
@@ -328,7 +343,8 @@ exports.searchProducts = async (req, res) => {
 
         // Use AI-enhanced search with synonym matching and relevance ranking
         const products = await aiSearch.enhancedSearch({ search, category, minPrice, maxPrice });
-        res.render('customer/index', { products, search, category, minPrice, maxPrice, trending: [] });
+        const categories = (await Product.distinct('category')).sort();
+        res.render('customer/index', { products, categories, search, category, minPrice, maxPrice, trending: [] });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -429,15 +445,8 @@ exports.markHelpful = async (req, res) => {
             return res.redirect('back');
         }
         const userId = req.user._id;
-        const alreadyLiked = review.helpfulUsers.includes(userId);
-        if (alreadyLiked) {
-            review.helpfulUsers = review.helpfulUsers.filter(
-                id => id.toString() !== userId.toString()
-            );
-        } else {
-            review.helpfulUsers.push(userId);
-        }
-        await review.save();
+        const op = review.helpfulUsers.includes(userId) ? '$pull' : '$addToSet';
+        await Review.findByIdAndUpdate(req.params.id, { [op]: { helpfulUsers: userId } });
         res.redirect('back');
     } catch (error) {
         console.error(error);
@@ -496,6 +505,11 @@ exports.applyCoupon = async (req, res) => {
             return res.redirect('/cart');
         }
 
+        if (coupon.discount < 0 || coupon.discount > 100) {
+            req.flash('error_msg', 'Invalid coupon discount');
+            return res.redirect('/cart');
+        }
+
         req.session.discount = coupon.discount;
         req.session.appliedCoupon = coupon.code;
 
@@ -534,12 +548,24 @@ exports.createRazorpayOrder = async (req, res) => {
     try {
         const cart = getCart(req.session);
 
+        if (!cart.products || cart.products.length === 0) {
+            return res.status(400).json({ success: false, message: 'Cart is empty' });
+        }
+
         let amount = cart.totalAmount;
 
         if (req.session.discount) {
             amount =
                 cart.totalAmount -
                 (cart.totalAmount * req.session.discount) / 100;
+        }
+
+        if (amount <= 0) {
+            return res.status(400).json({ success: false, message: 'Order total must be greater than zero' });
+        }
+
+        if (amount < 1) {
+            amount = 1;
         }
 
         const options = {
@@ -554,7 +580,7 @@ exports.createRazorpayOrder = async (req, res) => {
         const order = await razorpay.orders.create(options);
         res.json(order);
     } catch (error) {
-        console.error(error);
+        console.error('Razorpay order creation error:', error.description || error.message || error);
         res.status(500).json({ success: false, message: 'Order creation failed' });
     }
 };

@@ -49,7 +49,7 @@ graph TB
 
     %% === MODELS ===
     mUser["👤 models/User.js<br/>username · email · password<br/>role · shopName · wishlist"]
-    mProduct["📦 models/Product.js<br/>name · price · category<br/>stock · imageUrl · vendor"]
+    mProduct["📦 models/Product.js<br/>name · price · category<br/>stock · image · vendor"]
     mOrder["📋 models/Order.js<br/>customer · products[] · totalAmount<br/>status · shippingAddress"]
     mReview["⭐ models/Review.js<br/>product · user · rating<br/>comment · helpfulUsers"]
     mCoupon["🎫 models/Coupon.js<br/>code · discount<br/>expiryDate · isActive"]

@@ -48,8 +48,7 @@ exports.postAddProduct = async (req, res) => {
             price: priceNum,
             category,
             stock: stockNum,
-            imageUrl: req.file ? null : imageUrl,
-            image: req.file ? `/uploads/products/${req.file.filename}` : null,
+            image: imageData,
             vendor: req.user.id
         });
         await newProduct.save();
@@ -115,20 +114,18 @@ exports.postEditProduct = async (req, res) => {
         // Handle image update
         if (req.file) {
             // Delete old local image if exists
-            if (product.image) {
+            if (product.image && product.image.startsWith('/uploads/')) {
                 const oldPath = path.join(__dirname, '..', product.image);
                 if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
             }
             updateData.image = `/uploads/products/${req.file.filename}`;
-            updateData.imageUrl = null;
-        } else if (imageUrl !== undefined && imageUrl !== product.imageUrl) {
+        } else if (imageUrl && imageUrl !== product.image) {
             // Delete old local image if switching to URL
-            if (product.image) {
+            if (product.image && product.image.startsWith('/uploads/')) {
                 const oldPath = path.join(__dirname, '..', product.image);
                 if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
             }
-            updateData.imageUrl = imageUrl;
-            updateData.image = null;
+            updateData.image = imageUrl;
         }
 
         await Product.findByIdAndUpdate(req.params.id, updateData);

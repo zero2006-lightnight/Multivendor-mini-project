@@ -1,71 +1,86 @@
 <%- include('../partials/header') %>
 
-<h2>Add Product</h2>
-<% if (typeof error !== 'undefined') { %>
-    <div class="alert alert-danger"><%= error %></div>
-<% } %>
-<% if(success_msg.length > 0) { %>
-    <div class="alert alert-success"><%= success_msg %></div>
-<% } %>
-<% if(error_msg.length > 0) { %>
-    <div class="alert alert-danger"><%= error_msg %></div>
-<% } %>
+<div class="form-page">
+    <div class="page-header" style="max-width: none;">
+        <h2>Add Product</h2>
+    </div>
 
-<form action="/vendor/products/add" method="POST" enctype="multipart/form-data">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="mb-3">
-                <label for="name" class="form-label">Product Name</label>
-                <input type="text" class="form-control" id="name" name="name" required>
-            </div>
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
-            </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="price" class="form-label">Price (₹)</label>
-                    <input type="number" step="0.01" min="0" class="form-control" id="price" name="price" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="stock" class="form-label">Stock Quantity</label>
-                    <input type="number" min="0" class="form-control" id="stock" name="stock" required>
-                </div>
-            </div>
-            <div class="mb-3">
-                <label for="category" class="form-label">Category</label>
-                <select name="category" class="form-control" id="category" required>
-                    <option value="">Select Category</option>
-                    <option value="Electronics">Electronics</option>
-                    <option value="Fashion">Fashion</option>
-                    <option value="Books">Books</option>
-                    <option value="Home">Home</option>
-                    <option value="Sports">Sports</option>
-                    <option value="Accessories">Accessories</option>
-                </select>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="mb-3">
-                <label class="form-label">Product Image</label>
-                <div class="card p-3" id="dropZone" style="border: 2px dashed #ccc; text-align: center; cursor: pointer; min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                    <img id="imagePreview" src="" alt="Preview" style="max-width: 100%; max-height: 180px; display: none; border-radius: 8px;">
-                    <div id="dropText">
-                        <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #ccc;"></i>
-                        <p class="mt-2 text-muted">Click or drag to upload image</p>
+    <% if (typeof error !== 'undefined') { %>
+        <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+    <% if(success_msg.length > 0) { %>
+        <div class="alert alert-success"><%= success_msg %></div>
+    <% } %>
+    <% if(error_msg.length > 0) { %>
+        <div class="alert alert-danger"><%= error_msg %></div>
+    <% } %>
+
+    <form action="/vendor/products/add" method="POST" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="form-section">
+                    <div class="form-section-title">Product Details</div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Product Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
                     </div>
                 </div>
-                <input type="file" class="form-control mt-2" id="productImage" name="productImage" accept="image/*" onchange="previewImage(this)">
+
+                <div class="form-section">
+                    <div class="form-section-title">Pricing & Inventory</div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="price" class="form-label">Price (&#8377;)</label>
+                            <input type="number" step="0.01" min="0" class="form-control" id="price" name="price" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="stock" class="form-label">Stock Quantity</label>
+                            <input type="number" min="0" class="form-control" id="stock" name="stock" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select name="category" class="form-control" id="category" required>
+                            <option value="">Select Category</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Fashion">Fashion</option>
+                            <option value="Books">Books</option>
+                            <option value="Home">Home</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Accessories">Accessories</option>
+                        </select>
+                    </div>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="imageUrl" class="form-label">Or paste Image URL</label>
-                <input type="url" class="form-control" id="imageUrl" name="imageUrl" placeholder="https://example.com/image.jpg">
-                <small class="text-muted">Leave empty if uploading a file</small>
+
+            <div class="col-md-4">
+                <div class="form-section">
+                    <div class="form-section-title">Product Image</div>
+                    <div class="upload-zone" id="dropZone">
+                        <img id="imagePreview" src="" alt="Preview" class="upload-zone-preview" style="display: none;">
+                        <div id="dropText">
+                            <div class="upload-zone-icon">&#128228;</div>
+                            <div class="upload-zone-text">Click or drag to upload image</div>
+                        </div>
+                    </div>
+                    <input type="file" class="form-control mt-2" id="productImage" name="productImage" accept="image/*" onchange="previewImage(this)">
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">Or Use Image URL</div>
+                    <input type="url" class="form-control" id="imageUrl" name="imageUrl" placeholder="https://example.com/image.jpg">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">Leave empty if uploading a file</div>
+                </div>
             </div>
         </div>
-    </div>
-    <button type="submit" class="btn btn-primary btn-lg">Add Product</button>
-</form>
+
+        <button type="submit" class="btn btn-primary" style="padding: 0.85rem 2.5rem; margin-top: 0.5rem;">Add Product</button>
+    </form>
+</div>
 
 <script>
 function previewImage(input) {
@@ -84,11 +99,11 @@ function previewImage(input) {
 
 const dropZone = document.getElementById('dropZone');
 dropZone.addEventListener('click', () => document.getElementById('productImage').click());
-dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = '#007bff'; });
-dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = '#ccc'; });
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--accent)'; });
+dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'var(--border)'; });
 dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
-    dropZone.style.borderColor = '#ccc';
+    dropZone.style.borderColor = 'var(--border)';
     const files = e.dataTransfer.files;
     if (files.length) {
         document.getElementById('productImage').files = files;

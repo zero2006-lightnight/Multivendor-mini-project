@@ -29,7 +29,12 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'fallback-secret-change-me',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+    cookie: {
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        sameSite: 'lax'
+    }
 }));
 
 app.use(flash());
@@ -56,45 +61,6 @@ app.use((req, res, next) => {
 // Health check endpoint (for Render)
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok', uptime: process.uptime() });
-});
-
-// Serve the generated PPT presentation
-const pptPath = path.join(__dirname, 'ppt', 'Multi-Vendor-Marketplace.pptx');
-app.get('/presentation', (req, res) => {
-    if (fs.existsSync(pptPath)) {
-        res.download(pptPath, 'MultiVendorMarketplace_Presentation.pptx', (err) => {
-            if (err) {
-                console.error('Download error:', err);
-                res.status(500).send('Error downloading presentation.');
-            }
-        });
-    } else {
-        res.status(404).send('Presentation not found. Run `node generate-ppt.js` first.');
-    }
-});
-
-// Presentation info page
-app.get('/presentation/info', (req, res) => {
-    try {
-        if (fs.existsSync(pptPath)) {
-            const stats = fs.statSync(pptPath);
-            res.json({
-                available: true,
-                fileName: 'Multi-Vendor-Marketplace.pptx',
-                sizeKB: (stats.size / 1024).toFixed(1),
-                slides: 12,
-                downloadUrl: '/presentation',
-                generatedAt: stats.mtime
-            });
-        } else {
-            res.json({
-                available: false,
-                message: 'Run `node generate-ppt.js` to generate the presentation'
-            });
-        }
-    } catch {
-        res.json({ available: false, message: 'Presentation file unavailable' });
-    }
 });
 
 // Routes

@@ -107,44 +107,4 @@ exports.getTrendingProducts = async (limit = 8) => {
     }
 };
 
-// Get personalized recommendations based on user's purchase/wishlist history
-exports.getPersonalizedRecommendations = async (userId, limit = 8) => {
-    try {
-        // Get user's past orders and wishlist
-        const userOrders = await Order.find({ customer: userId }).populate('products.product');
-        const purchasedCategories = {};
-        const purchasedIds = new Set();
 
-        userOrders.forEach(order => {
-            order.products.forEach(item => {
-                if (item.product) {
-                    purchasedIds.add(item.product._id.toString());
-                    const cat = item.product.category;
-                    purchasedCategories[cat] = (purchasedCategories[cat] || 0) + 1;
-                }
-            });
-        });
-
-        // Get top categories
-        const topCategories = Object.entries(purchasedCategories)
-            .sort(([, a], [, b]) => b - a)
-            .slice(0, 3)
-            .map(([cat]) => cat);
-
-        if (topCategories.length === 0) {
-            // Cold start: return trending products
-            return exports.getTrendingProducts(limit);
-        }
-
-        // Find products from top categories that user hasn't purchased
-        const recommendations = await Product.find({
-            _id: { $nin: [...purchasedIds] },
-            category: { $in: topCategories }
-        }).limit(limit);
-
-        return recommendations;
-    } catch (error) {
-        console.error('Personalized recs error:', error.message);
-        return exports.getTrendingProducts(limit);
-    }
-};

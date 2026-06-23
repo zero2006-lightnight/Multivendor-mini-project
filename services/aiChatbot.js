@@ -238,12 +238,20 @@ async function generateAIResponse(message, userId) {
             temperature: 0.7
         });
 
-        return {
-            text: response.choices[0].message.content,
-            products: []
-        };
+        const content = response?.choices?.[0]?.message?.content?.trim();
+
+        // Free/slow models sometimes return empty content. Fall back to the
+        // rule-based path, which always has text and can attach product cards.
+        if (!content) {
+            return generateRuleResponse(message, userId);
+        }
+
+        // Pair the AI's prose with relevant product cards from the rule-based
+        // path so answers like "trending products" still render clickable items.
+        const rule = await generateRuleResponse(message, userId);
+        return { text: content, products: rule.products };
     } catch (error) {
-        console.error('OpenAI error:', error.message);
+        console.error('AI provider error:', error.message);
         return generateRuleResponse(message, userId);
     }
 }

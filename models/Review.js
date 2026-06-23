@@ -14,10 +14,6 @@ const reviewSchema = new mongoose.Schema({
         min: 1,
         max: 5
     },
-    order: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Order'
-},
 helpfulUsers: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

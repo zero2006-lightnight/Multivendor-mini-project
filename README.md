@@ -26,6 +26,7 @@ A full-stack multi-vendor marketplace web application built with Node.js, Expres
 - View order history and **download invoices**
 - Write, edit, and delete product reviews
 - Email order confirmations
+- **AI shopping assistant** — chatbot for product search, prices, stock, orders, and trending picks (OpenRouter/OpenAI-powered, with a rule-based fallback when no API key is set)
 
 ### 🏪 Vendor Features
 - Dashboard with product overview
@@ -96,7 +97,8 @@ Edit `.env` with your configuration (see [Environment Variables](#environment-va
 
 ### 4. Seed the database
 ```bash
-# Create sample users, products, and coupons
+# Create sample users, coupons, and ~200 products fetched from the DummyJSON API
+# (falls back to 5 built-in sample products if the API is unreachable)
 node seed.js
 ```
 
@@ -140,6 +142,12 @@ SMTP_PORT=587
 SMTP_USER=your-email@example.com
 SMTP_PASS=your-password
 SMTP_FROM=Marketplace <no-reply@marketplace.com>
+
+# AI Chatbot (optional - falls back to rule-based replies if unset)
+OPENROUTER_API_KEY=sk-or-xxxxxxxxxxxxxxxxxxxx
+AI_MODEL=openrouter/free
+# Or use OpenAI directly instead of OpenRouter:
+# OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxx
 ```
 
 ---
@@ -182,6 +190,9 @@ After running `node seed.js`:
 | POST | `/apply-coupon` | Apply coupon code |
 | POST | `/review/:productId` | Submit review |
 | POST | `/review/helpful/:id` | Mark review helpful |
+| POST | `/ai/chatbot` | AI shopping assistant chat |
+| GET | `/ai/recommendations/trending` | Trending products (JSON) |
+| GET | `/ai/search/suggestions` | Search autocomplete suggestions (JSON) |
 
 ### Vendor Routes (require vendor role)
 | Method | Route | Description |
@@ -214,8 +225,8 @@ After running `node seed.js`:
 Source_Code/
 ├── app.js                    # Express app configuration
 ├── package.json              # Dependencies and scripts
-├── seed.js                   # Database seeder
-├── seedCoupon.js             # Coupon seeder
+├── seed.js                   # Database seeder (users, products via DummyJSON, coupons)
+├── generate-ppt.js           # Generates the project presentation (.pptx)
 ├── .env.example              # Environment variables template
 ├── config/
 │   ├── database.js           # MongoDB connection
@@ -237,7 +248,12 @@ Source_Code/
 │   ├── auth.js               # Auth routes
 │   ├── admin.js              # Admin routes
 │   ├── customer.js           # Customer routes
-│   └── vendor.js             # Vendor routes
+│   ├── vendor.js             # Vendor routes
+│   └── ai.js                 # AI chatbot & recommendation routes
+├── services/
+│   ├── aiChatbot.js          # Chatbot (OpenRouter/OpenAI + rule-based fallback)
+│   ├── aiRecommendations.js  # Trending product logic
+│   └── aiSearch.js           # Synonym-aware product search
 ├── views/
 │   ├── partials/             # Reusable components
 │   │   ├── header.ejs

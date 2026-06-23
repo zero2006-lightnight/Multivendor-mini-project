@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Add reveal to search container
-    const searchContainers = document.querySelectorAll('.search-container, .trending-section, .recommendation-section');
+    const searchContainers = document.querySelectorAll('.search-container, .trending-section');
     searchContainers.forEach(el => {
         el.classList.add('reveal');
         revealObserver.observe(el);
@@ -155,17 +155,6 @@ window.addEventListener('scroll', () => {
     }
 });
 
-// SweetAlert2 defaults
-if (typeof Swal !== 'undefined') {
-    Swal.mixin({
-        background: '#1e1e1e',
-        color: '#ffffff',
-        confirmButtonColor: '#6366f1',
-        cancelButtonColor: '#555',
-        buttonsStyling: true
-    });
-}
-
 // ============================================
 // THEME TOGGLE (Light / Dark)
 // ============================================
@@ -202,61 +191,4 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e
     if (!localStorage.getItem(STORAGE_KEY)) {
         applyTheme(e.matches ? 'light' : 'dark');
     }
-});
-
-// ============================================
-// BEFORE / AFTER SLIDER
-// ============================================
-document.querySelectorAll('.ba-slider').forEach(slider => {
-    const before = slider.querySelector('.ba-before');
-    const handle = slider.querySelector('.ba-handle');
-    if (!before || !handle) return;
-
-    let isDragging = false;
-
-    function setPosition(x) {
-        const rect = slider.getBoundingClientRect();
-        let percent = ((x - rect.left) / rect.width) * 100;
-        percent = Math.max(0, Math.min(100, percent));
-        before.style.width = percent + '%';
-        handle.style.left = percent + '%';
-    }
-
-    // Mouse events
-    handle.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        e.preventDefault();
-    });
-
-    slider.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        setPosition(e.clientX);
-    });
-
-    document.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        setPosition(e.clientX);
-    });
-
-    document.addEventListener('mouseup', () => { isDragging = false; });
-
-    // Touch events
-    handle.addEventListener('touchstart', (e) => {
-        isDragging = true;
-    }, { passive: true });
-
-    slider.addEventListener('touchstart', (e) => {
-        isDragging = true;
-        setPosition(e.touches[0].clientX);
-    }, { passive: true });
-
-    document.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        setPosition(e.touches[0].clientX);
-    }, { passive: true });
-
-    document.addEventListener('touchend', () => { isDragging = false; });
-
-    // Set initial position to 50%
-    setPosition(slider.getBoundingClientRect().left + slider.getBoundingClientRect().width / 2);
 });

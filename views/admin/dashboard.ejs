@@ -1,76 +1,65 @@
 <%- include('../partials/header') %>
 
-<h2>Admin Dashboard</h2>
+<div class="admin-page">
+    <div class="page-header">
+        <h2>Admin Dashboard</h2>
+    </div>
 
-<!-- Quick Stats -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card text-white bg-primary">
-            <div class="card-body text-center">
-                <h6 class="card-title">Total Users</h6>
-                <h3><%= typeof totalUsers !== 'undefined' ? totalUsers : '-' %></h3>
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">&#128101;</div>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value"><%= typeof totalUsers !== 'undefined' ? totalUsers : '-' %></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">&#128230;</div>
+                <div class="stat-label">Total Products</div>
+                <div class="stat-value"><%= typeof totalProducts !== 'undefined' ? totalProducts : '-' %></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">&#128196;</div>
+                <div class="stat-label">Total Orders</div>
+                <div class="stat-value"><%= typeof totalOrders !== 'undefined' ? totalOrders : '-' %></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">&#128176;</div>
+                <div class="stat-label">Revenue</div>
+                <div class="stat-value">&#8377;<%= typeof totalRevenue !== 'undefined' ? totalRevenue.toFixed(0) : '-' %></div>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-success">
-            <div class="card-body text-center">
-                <h6 class="card-title">Total Products</h6>
-                <h3><%= typeof totalProducts !== 'undefined' ? totalProducts : '-' %></h3>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-info">
-            <div class="card-body text-center">
-                <h6 class="card-title">Total Orders</h6>
-                <h3><%= typeof totalOrders !== 'undefined' ? totalOrders : '-' %></h3>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-warning">
-            <div class="card-body text-center">
-                <h6 class="card-title">Revenue</h6>
-                <h3>₹<%= typeof totalRevenue !== 'undefined' ? totalRevenue.toFixed(0) : '-' %></h3>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Quick Links -->
-<div class="row">
-    <div class="col-md-4">
-        <div class="card mb-3">
-            <div class="card-body text-center">
-                <h5>👥 Users</h5>
-                <a href="/admin/users" class="btn btn-outline-primary">Manage Users</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card mb-3">
-            <div class="card-body text-center">
-                <h5>📦 Products</h5>
-                <a href="/admin/products" class="btn btn-outline-success">Manage Products</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card mb-3">
-            <div class="card-body text-center">
-                <h5>📋 Orders</h5>
-                <a href="/admin/orders" class="btn btn-outline-info">Manage Orders</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card mb-3">
-            <div class="card-body text-center">
-                <h5>📊 Analytics</h5>
-                <a href="/admin/analytics" class="btn btn-outline-warning">View Analytics</a>
-            </div>
-        </div>
+    <!-- Quick Links -->
+    <div class="form-section-title" style="margin-bottom: 1rem;">Quick Links</div>
+    <div class="quick-links">
+        <a href="/admin/users" class="quick-link-card" style="text-decoration: none; color: inherit;">
+            <div class="link-icon">&#128101;</div>
+            <h5>Users</h5>
+            <span class="btn btn-outline-primary btn-sm">Manage</span>
+        </a>
+        <a href="/admin/products" class="quick-link-card" style="text-decoration: none; color: inherit;">
+            <div class="link-icon">&#128230;</div>
+            <h5>Products</h5>
+            <span class="btn btn-outline-primary btn-sm">Manage</span>
+        </a>
+        <a href="/admin/orders" class="quick-link-card" style="text-decoration: none; color: inherit;">
+            <div class="link-icon">&#128196;</div>
+            <h5>Orders</h5>
+            <span class="btn btn-outline-primary btn-sm">Manage</span>
+        </a>
+        <a href="/admin/analytics" class="quick-link-card" style="text-decoration: none; color: inherit;">
+            <div class="link-icon">&#128200;</div>
+            <h5>Analytics</h5>
+            <span class="btn btn-outline-primary btn-sm">View</span>
+        </a>
     </div>
 </div>
 

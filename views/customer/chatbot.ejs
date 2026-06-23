@@ -418,7 +418,7 @@
                             <li>🔍 Search & discover products</li>
                             <li>💰 Check prices & availability</li>
                             <li>📋 Track your orders</li>
-                            <li>🌟 Get personalized recommendations</li>
+                            <li>🌟 Discover trending products</li>
                         </ul>
                     </div>
                     <div class="quick-replies">
@@ -467,7 +467,7 @@ function addMessage(text, products, isUser) {
     if (products && products.length > 0) {
         html += '<div class="chat-products">';
         products.forEach(p => {
-            const img = p.image || p.imageUrl || '';
+            const img = p.image || '';
             html += `<a href="/product/${p._id}" class="chat-product-card">
                 ${img ? `<img src="${img}" alt="${escapeHtml(p.name)}" style="opacity:1 !important;">` : ''}
                 <div class="product-name">${escapeHtml(p.name)}</div>
@@ -525,18 +525,28 @@ async function sendMessage() {
     addMessage(message, [], true);
     addTypingIndicator();
 
+    // AI models can be slow; allow up to 30s before giving up.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
     try {
         const res = await fetch('/ai/chatbot', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message })
+            body: JSON.stringify({ message }),
+            signal: controller.signal
         });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         removeTypingIndicator();
-        addMessage(data.text, data.products, false);
+        addMessage(data.text || "Sorry, I couldn't generate a response. Please try again.", data.products, false);
     } catch (err) {
         removeTypingIndicator();
-        addMessage('Sorry, I encountered an error. Please try again.', [], false);
+        const msg = err.name === 'AbortError'
+            ? 'That took too long to respond. Please try again.'
+            : 'Sorry, I encountered an error. Please try again.';
+        addMessage(msg, [], false);
+    } finally {
+        clearTimeout(timeout);
     }
 }
 
