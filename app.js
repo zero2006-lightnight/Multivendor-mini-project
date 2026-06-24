@@ -84,10 +84,11 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
     console.error('Unhandled error:', err);
     console.error('Error stack:', err.stack);
-    res.status(500).json({
-        error: err.message || 'Something went wrong',
-        stack: process.env.NODE_ENV === 'production' ? undefined : err.stack
-    });
+    res.status(500).send(`
+        <h1>Server Error</h1>
+        <pre>${err.message || 'Unknown error'}</pre>
+        <pre>${err.stack || ''}</pre>
+    `);
 });
 
 const PORT = process.env.PORT || 3000;
