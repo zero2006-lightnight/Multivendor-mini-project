@@ -576,7 +576,14 @@ exports.createRazorpayOrder = async (req, res) => {
         };
 
         if (!razorpay) {
-            return res.status(500).json({ success: false, message: 'Payment gateway not configured' });
+            // Demo mode - return mock order
+            return res.json({
+                id: 'demo_order_' + Date.now(),
+                amount: options.amount,
+                currency: options.currency,
+                receipt: options.receipt,
+                status: 'created'
+            });
         }
         const order = await razorpay.orders.create(options);
         res.json(order);
