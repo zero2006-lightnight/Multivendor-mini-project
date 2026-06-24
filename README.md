@@ -2,6 +2,49 @@
 
 A full-stack multi-vendor marketplace web application built with Node.js, Express, MongoDB, and EJS. Vendors can list products, customers can browse and purchase, and admins can manage the entire platform.
 
+## Contributors
+
+### Hemanth Kumar Kunchapu
+
+**Role:** Backend Developer & Payment Integration
+
+#### Contributions:
+
+* Implemented Razorpay Payment Gateway Integration
+* Developed Checkout Flow
+* Implemented Coupon & Discount System
+* Integrated MongoDB Atlas Database
+* Developed Order Management Functionality
+* Implemented Payment Status Tracking
+* Fixed MongoDB Authentication and Database Connectivity Issues
+* Developed Order History and Checkout Modules
+
+### Neeraj Pasupuleti
+
+**Role:** Development & Repository Management
+
+#### Contributions:
+
+* Repository Setup and GitHub Management
+* UI Enhancements
+* Feature Integration
+* Project Collaboration and Testing
+
+## Key Features
+
+* User Authentication
+* Vendor Dashboard
+* Product Management
+* Shopping Cart
+* Wishlist
+* Coupon System
+* Razorpay Payment Gateway
+* MongoDB Atlas Integration
+* Order Management
+* Order History
+* Payment Status Tracking
+
+
 ## 📋 Table of Contents
 
 - [Features](#features)
