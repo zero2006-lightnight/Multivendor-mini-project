@@ -82,7 +82,11 @@ app.use((req, res) => {
 // Global error handler
 app.use((err, req, res, next) => {
     console.error('Unhandled error:', err);
-    res.status(500).send('Something went wrong. Please try again later.');
+    console.error('Error stack:', err.stack);
+    res.status(500).json({
+        error: err.message || 'Something went wrong',
+        stack: process.env.NODE_ENV === 'production' ? undefined : err.stack
+    });
 });
 
 const PORT = process.env.PORT || 3000;
