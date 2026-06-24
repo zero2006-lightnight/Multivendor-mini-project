@@ -95,6 +95,7 @@ exports.getProducts = async (req, res) => {
         const trending = await aiRecommendations.getTrendingProducts(6);
         res.render('customer/index', { products, categories, trending, search: '', category: '', minPrice: '', maxPrice: '' });
     } catch (error) {
+        console.error('getProducts (homepage) error:', error);
         res.status(500).send('Server Error');
     }
 };
