@@ -2,7 +2,7 @@
 
 A full-stack multi-vendor marketplace web application built with Node.js, Express, MongoDB, and EJS. Vendors can list products, customers can browse and purchase, and admins can manage the entire platform.
 
-## Contributors
+## CONTRIBUTORS
 
 ### Hemanth Kumar Kunchapu
 
