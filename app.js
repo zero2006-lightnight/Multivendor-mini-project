@@ -1,6 +1,7 @@
 
 require('dotenv').config();
 const express = require('express');
+require('express-async-errors');
 const path = require('path');
 const fs = require('fs');
 const session = require('express-session');
